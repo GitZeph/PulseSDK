@@ -26,7 +26,5 @@ cmake_install.cmake
 # OS / editor noise
 .DS_Store
 .idea/
-.vscode/
-
-# Kiro spec workspace (internal planning notes, not part of the public project)
 .kiro
+.vscode/
