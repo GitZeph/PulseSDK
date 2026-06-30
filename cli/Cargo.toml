@@ -1,0 +1,55 @@
+[package]
+name = "pulse-cli"
+version = "0.1.0"
+edition = "2021"
+description = "Pulse CLI — scaffold, build e publish delle mod Pulse (Req 14, 26.6)"
+license = "MIT"
+publish = false
+
+# Binario `pulse` (Req 14: pulse new/build/publish). La CLI è un tool
+# standalone Rust, non linkato nel processo di Geometry Dash (design, Req 26.6).
+[[bin]]
+name = "pulse"
+path = "src/main.rs"
+
+# Dipendenze con versioni esatte/pinnate (riproducibilità della build CLI).
+[dependencies]
+clap = { version = "=4.5.51", features = ["derive"] }
+serde = { version = "=1.0.228", features = ["derive"] }
+# Serializzazione deterministica della Surface_IR verso `surface.ir.json`
+# (Req 10.2, 10.3): l'ordine dei campi delle struct e degli elementi dei Vec è
+# preservato, quindi il pretty-print è byte-stabile a parità di IR.
+serde_json = "=1.0.150"
+toml = "=0.8.23"
+anyhow = "=1.0.100"
+thiserror = "=2.0.17"
+# Container del Pulse Package `.pulse` (ZIP) e hash di integrità MANIFEST.sha256
+# (Req 14.3, 28.6). Range compatibili: la build seleziona l'ultima versione
+# minore compatibile e la pinna nel Cargo.lock per riproducibilità.
+zip = { version = "2", default-features = false, features = ["deflate"] }
+sha2 = "0.10"
+# Parsing format-agnostico dei Source_Binary (ELF / Mach-O / PE) per il
+# Binding_Extractor (`cli/src/extract/`): rilevazione di formato e architettura
+# senza re-emettere i byte del binario (Req 9.4, 10). Range compatibile pinnato
+# nel Cargo.lock per riproducibilità.
+object = { version = "0.36", default-features = false, features = ["read"] }
+# Demangler Itanium C++ per l'`ItaniumDemangler` del Binding_Extractor
+# (`cli/src/extract/demangle.rs`): decodifica i Mangled_Symbol dell'ELF Android
+# in classe/metodo/firma first-party (Req 2.2, 2.3). Range compatibile pinnato
+# nel Cargo.lock per riproducibilità, coerente con `object`/`sha2`.
+cpp_demangle = "0.5"
+# Disassemblatori decode-only, pure-Rust, no_std-friendly (nessuna dipendenza C)
+# per il `PrologueSanityChecker` del Binding_Extractor
+# (`cli/src/extract/prologue.rs`): decodificano la finestra di prologo ≥16 byte
+# per arm64 (AArch64) e x86-64 e confermano che l'intera finestra sia composta
+# di istruzioni valide/definite (Req 5.1). Famiglia `yaxpeax`. Range compatibili
+# pinnati nel Cargo.lock per riproducibilità, coerenti con `object`/`sha2`.
+yaxpeax-arch = { version = "0.3", default-features = false }
+yaxpeax-arm = { version = "0.3", default-features = false }
+yaxpeax-x86 = { version = "2", default-features = false }
+
+# Dipendenze di sviluppo (solo test).
+[dev-dependencies]
+# Property-based testing del round-trip del Manifest (Req 16.5, Property 34).
+# Range compatibile pinnato nel Cargo.lock per riproducibilità.
+proptest = "1"

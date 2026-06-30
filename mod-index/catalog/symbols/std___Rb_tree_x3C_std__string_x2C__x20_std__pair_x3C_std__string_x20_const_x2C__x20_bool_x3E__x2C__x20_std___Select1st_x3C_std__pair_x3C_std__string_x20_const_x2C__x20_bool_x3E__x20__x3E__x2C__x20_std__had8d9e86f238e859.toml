@@ -1,0 +1,20 @@
+schema_version = 1
+symbol = "std::_Rb_tree<std::string, std::pair<std::string const, bool>, std::_Select1st<std::pair<std::string const, bool> >, std::less<std::string>, std::allocator<std::pair<std::string const, bool> > >::_M_erase"
+
+[signature]
+return = "?"
+params = ["std::_Rb_tree<std::string, std::pair<std::string const, bool>, std::_Select1st<std::pair<std::string const, bool> >, std::less<std::string>, std::allocator<std::pair<std::string const, bool> > >*", "std::_Rb_tree_node<std::pair<std::string const, bool> >*"]
+
+[[offset]]
+gd_version = "2.2081"
+platform = "android-arm64"
+rva = 0x71A2F0
+verified = true
+
+[offset.provenance]
+tier = "symbol-table"
+derivation_method = "android-symbol-table"
+binary_identity = ["android-arm64:dda3752ab3a912fd"]
+prologue_method = "auto-sanity"
+prologue_outcome = "plausible-entry"
+cross_check_no_reuse = true

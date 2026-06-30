@@ -1,0 +1,20 @@
+schema_version = 1
+symbol = "tinyxml2::XMLComment::ParseDeep"
+
+[signature]
+return = "?"
+params = ["tinyxml2::XMLComment*", "char*", "tinyxml2::StrPair*"]
+
+[[offset]]
+gd_version = "2.2081"
+platform = "android-arm64"
+rva = 0xB27420
+verified = true
+
+[offset.provenance]
+tier = "symbol-table"
+derivation_method = "android-symbol-table"
+binary_identity = ["android-arm64:dda3752ab3a912fd"]
+prologue_method = "auto-sanity"
+prologue_outcome = "plausible-entry"
+cross_check_no_reuse = true

@@ -1,0 +1,20 @@
+schema_version = 1
+symbol = "std::_Rb_tree<std::tuple<int, int, int>, std::tuple<int, int, int>, std::_Identity<std::tuple<int, int, int> >, std::less<std::tuple<int, int, int> >, std::allocator<std::tuple<int, int, int> > >::_M_insert_unique<std::tuple<int, int, int> const&>"
+
+[signature]
+return = "std::pair<std::_Rb_tree_iterator<std::tuple<int, int, int> >, bool>"
+params = ["std::_Rb_tree<std::tuple<int, int, int>, std::tuple<int, int, int>, std::_Identity<std::tuple<int, int, int> >, std::less<std::tuple<int, int, int> >, std::allocator<std::tuple<int, int, int> > >*", "std::tuple<int, int, int> const&"]
+
+[[offset]]
+gd_version = "2.2081"
+platform = "android-arm64"
+rva = 0x87474C
+verified = true
+
+[offset.provenance]
+tier = "symbol-table"
+derivation_method = "android-symbol-table"
+binary_identity = ["android-arm64:dda3752ab3a912fd"]
+prologue_method = "auto-sanity"
+prologue_outcome = "plausible-entry"
+cross_check_no_reuse = true

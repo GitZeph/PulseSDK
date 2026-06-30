@@ -1,0 +1,20 @@
+schema_version = 1
+symbol = "std::_Rb_tree<std::pair<GJGameEvent, int>, std::pair<std::pair<GJGameEvent, int> const, int>, std::_Select1st<std::pair<std::pair<GJGameEvent, int> const, int> >, std::less<std::pair<GJGameEvent, int> >, std::allocator<std::pair<std::pair<GJGameEvent, int> const, int> > >::_M_get_insert_unique_pos"
+
+[signature]
+return = "?"
+params = ["std::_Rb_tree<std::pair<GJGameEvent, int>, std::pair<std::pair<GJGameEvent, int> const, int>, std::_Select1st<std::pair<std::pair<GJGameEvent, int> const, int> >, std::less<std::pair<GJGameEvent, int> >, std::allocator<std::pair<std::pair<GJGameEvent, int> const, int> > >*", "std::pair<GJGameEvent, int> const&"]
+
+[[offset]]
+gd_version = "2.2081"
+platform = "android-arm64"
+rva = 0x888C2C
+verified = true
+
+[offset.provenance]
+tier = "symbol-table"
+derivation_method = "android-symbol-table"
+binary_identity = ["android-arm64:dda3752ab3a912fd"]
+prologue_method = "auto-sanity"
+prologue_outcome = "plausible-entry"
+cross_check_no_reuse = true

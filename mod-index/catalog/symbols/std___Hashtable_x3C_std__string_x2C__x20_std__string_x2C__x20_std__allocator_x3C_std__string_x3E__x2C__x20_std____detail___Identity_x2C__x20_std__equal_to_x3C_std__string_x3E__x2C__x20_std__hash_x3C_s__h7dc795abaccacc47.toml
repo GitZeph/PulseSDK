@@ -1,0 +1,20 @@
+schema_version = 1
+symbol = "std::_Hashtable<std::string, std::string, std::allocator<std::string>, std::__detail::_Identity, std::equal_to<std::string>, std::hash<std::string>, std::__detail::_Mod_range_hashing, std::__detail::_Default_ranged_hash, std::__detail::_Prime_rehash_policy, std::__detail::_Hashtable_traits<true, true, true> >::_M_insert<std::string, std::__detail::_AllocNode<std::allocator<std::__detail::_Hash_node<std::string, true> > > >"
+
+[signature]
+return = "std::pair<std::__detail::_Node_iterator<std::string, true, true>, bool>"
+params = ["std::_Hashtable<std::string, std::string, std::allocator<std::string>, std::__detail::_Identity, std::equal_to<std::string>, std::hash<std::string>, std::__detail::_Mod_range_hashing, std::__detail::_Default_ranged_hash, std::__detail::_Prime_rehash_policy, std::__detail::_Hashtable_traits<true, true, true> >*", "std::string&&", "std::__detail::_AllocNode<std::allocator<std::__detail::_Hash_node<std::string, true> > > const&", "std::integral_constant<bool, true>"]
+
+[[offset]]
+gd_version = "2.2081"
+platform = "android-arm64"
+rva = 0x731430
+verified = true
+
+[offset.provenance]
+tier = "symbol-table"
+derivation_method = "android-symbol-table"
+binary_identity = ["android-arm64:dda3752ab3a912fd"]
+prologue_method = "auto-sanity"
+prologue_outcome = "plausible-entry"
+cross_check_no_reuse = true

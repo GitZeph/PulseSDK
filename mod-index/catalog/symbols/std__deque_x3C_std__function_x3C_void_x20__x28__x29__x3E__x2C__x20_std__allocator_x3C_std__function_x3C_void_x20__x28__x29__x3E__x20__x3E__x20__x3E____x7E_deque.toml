@@ -1,0 +1,20 @@
+schema_version = 1
+symbol = "std::deque<std::function<void ()>, std::allocator<std::function<void ()> > >::~deque"
+
+[signature]
+return = "?"
+params = ["std::deque<std::function<void ()>, std::allocator<std::function<void ()> > >*"]
+
+[[offset]]
+gd_version = "2.2081"
+platform = "android-arm64"
+rva = 0xAAB8AC
+verified = true
+
+[offset.provenance]
+tier = "symbol-table"
+derivation_method = "android-symbol-table"
+binary_identity = ["android-arm64:dda3752ab3a912fd"]
+prologue_method = "auto-sanity"
+prologue_outcome = "plausible-entry"
+cross_check_no_reuse = true

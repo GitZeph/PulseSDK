@@ -1,0 +1,20 @@
+schema_version = 1
+symbol = "std::_Rb_tree<std::pair<int, int>, std::pair<std::pair<int, int> const, FMODSoundTween>, std::_Select1st<std::pair<std::pair<int, int> const, FMODSoundTween> >, std::less<std::pair<int, int> >, std::allocator<std::pair<std::pair<int, int> const, FMODSoundTween> > >::equal_range"
+
+[signature]
+return = "?"
+params = ["std::_Rb_tree<std::pair<int, int>, std::pair<std::pair<int, int> const, FMODSoundTween>, std::_Select1st<std::pair<std::pair<int, int> const, FMODSoundTween> >, std::less<std::pair<int, int> >, std::allocator<std::pair<std::pair<int, int> const, FMODSoundTween> > >*", "std::pair<int, int> const&"]
+
+[[offset]]
+gd_version = "2.2081"
+platform = "android-arm64"
+rva = 0x5AFF04
+verified = true
+
+[offset.provenance]
+tier = "symbol-table"
+derivation_method = "android-symbol-table"
+binary_identity = ["android-arm64:dda3752ab3a912fd"]
+prologue_method = "auto-sanity"
+prologue_outcome = "plausible-entry"
+cross_check_no_reuse = true

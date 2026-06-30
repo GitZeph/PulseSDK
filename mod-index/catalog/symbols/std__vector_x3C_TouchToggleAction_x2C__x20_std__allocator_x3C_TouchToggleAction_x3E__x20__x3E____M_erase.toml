@@ -1,0 +1,20 @@
+schema_version = 1
+symbol = "std::vector<TouchToggleAction, std::allocator<TouchToggleAction> >::_M_erase"
+
+[signature]
+return = "?"
+params = ["std::vector<TouchToggleAction, std::allocator<TouchToggleAction> >*", "__gnu_cxx::__normal_iterator<TouchToggleAction*, std::vector<TouchToggleAction, std::allocator<TouchToggleAction> > >"]
+
+[[offset]]
+gd_version = "2.2081"
+platform = "android-arm64"
+rva = 0x8A950C
+verified = true
+
+[offset.provenance]
+tier = "symbol-table"
+derivation_method = "android-symbol-table"
+binary_identity = ["android-arm64:dda3752ab3a912fd"]
+prologue_method = "auto-sanity"
+prologue_outcome = "plausible-entry"
+cross_check_no_reuse = true

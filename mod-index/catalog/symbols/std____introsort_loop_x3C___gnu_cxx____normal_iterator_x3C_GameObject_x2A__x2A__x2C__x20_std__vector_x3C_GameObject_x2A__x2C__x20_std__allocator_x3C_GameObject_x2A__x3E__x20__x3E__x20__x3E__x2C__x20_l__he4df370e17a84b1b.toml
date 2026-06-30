@@ -1,0 +1,20 @@
+schema_version = 1
+symbol = "std::__introsort_loop<__gnu_cxx::__normal_iterator<GameObject**, std::vector<GameObject*, std::allocator<GameObject*> > >, long, __gnu_cxx::__ops::_Iter_comp_iter<bool (*)(GameObject* const&, GameObject* const&)> >"
+
+[signature]
+return = "void"
+params = ["std*", "__gnu_cxx::__normal_iterator<GameObject**, std::vector<GameObject*, std::allocator<GameObject*> > >", "__gnu_cxx::__normal_iterator<GameObject**, std::vector<GameObject*, std::allocator<GameObject*> > >", "long", "__gnu_cxx::__ops::_Iter_comp_iter<bool (*)(GameObject* const&, GameObject* const&)>"]
+
+[[offset]]
+gd_version = "2.2081"
+platform = "android-arm64"
+rva = 0x89475C
+verified = true
+
+[offset.provenance]
+tier = "symbol-table"
+derivation_method = "android-symbol-table"
+binary_identity = ["android-arm64:dda3752ab3a912fd"]
+prologue_method = "auto-sanity"
+prologue_outcome = "plausible-entry"
+cross_check_no_reuse = true

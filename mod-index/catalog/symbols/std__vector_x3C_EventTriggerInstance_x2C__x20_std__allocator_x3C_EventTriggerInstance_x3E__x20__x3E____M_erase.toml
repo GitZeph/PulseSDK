@@ -1,0 +1,20 @@
+schema_version = 1
+symbol = "std::vector<EventTriggerInstance, std::allocator<EventTriggerInstance> >::_M_erase"
+
+[signature]
+return = "?"
+params = ["std::vector<EventTriggerInstance, std::allocator<EventTriggerInstance> >*", "__gnu_cxx::__normal_iterator<EventTriggerInstance*, std::vector<EventTriggerInstance, std::allocator<EventTriggerInstance> > >"]
+
+[[offset]]
+gd_version = "2.2081"
+platform = "android-arm64"
+rva = 0x8761F0
+verified = true
+
+[offset.provenance]
+tier = "symbol-table"
+derivation_method = "android-symbol-table"
+binary_identity = ["android-arm64:dda3752ab3a912fd"]
+prologue_method = "auto-sanity"
+prologue_outcome = "plausible-entry"
+cross_check_no_reuse = true

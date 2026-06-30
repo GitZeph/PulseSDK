@@ -1,0 +1,20 @@
+schema_version = 1
+symbol = "std::shuffle<__gnu_cxx::__normal_iterator<int*, std::vector<int, std::allocator<int> > >, std::linear_congruential_engine<unsigned long, (unsigned long)16807, (unsigned long)0, (unsigned long)2147483647> >"
+
+[signature]
+return = "void"
+params = ["std*", "__gnu_cxx::__normal_iterator<int*, std::vector<int, std::allocator<int> > >", "__gnu_cxx::__normal_iterator<int*, std::vector<int, std::allocator<int> > >", "std::linear_congruential_engine<unsigned long, (unsigned long)16807, (unsigned long)0, (unsigned long)2147483647>&&"]
+
+[[offset]]
+gd_version = "2.2081"
+platform = "android-arm64"
+rva = 0xA95244
+verified = true
+
+[offset.provenance]
+tier = "symbol-table"
+derivation_method = "android-symbol-table"
+binary_identity = ["android-arm64:dda3752ab3a912fd"]
+prologue_method = "auto-sanity"
+prologue_outcome = "plausible-entry"
+cross_check_no_reuse = true

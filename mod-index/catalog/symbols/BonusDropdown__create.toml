@@ -1,0 +1,20 @@
+schema_version = 1
+symbol = "BonusDropdown::create"
+
+[signature]
+return = "?"
+params = ["BonusDropdown*", "std::string", "int"]
+
+[[offset]]
+gd_version = "2.2081"
+platform = "android-arm64"
+rva = 0x56B7E0
+verified = true
+
+[offset.provenance]
+tier = "symbol-table"
+derivation_method = "android-symbol-table"
+binary_identity = ["android-arm64:dda3752ab3a912fd"]
+prologue_method = "auto-sanity"
+prologue_outcome = "plausible-entry"
+cross_check_no_reuse = true

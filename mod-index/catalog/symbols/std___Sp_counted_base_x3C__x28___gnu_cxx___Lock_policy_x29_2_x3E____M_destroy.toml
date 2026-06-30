@@ -1,0 +1,20 @@
+schema_version = 1
+symbol = "std::_Sp_counted_base<(__gnu_cxx::_Lock_policy)2>::_M_destroy"
+
+[signature]
+return = "?"
+params = ["std::_Sp_counted_base<(__gnu_cxx::_Lock_policy)2>*"]
+
+[[offset]]
+gd_version = "2.2081"
+platform = "android-arm64"
+rva = 0xAAACDC
+verified = true
+
+[offset.provenance]
+tier = "symbol-table"
+derivation_method = "android-symbol-table"
+binary_identity = ["android-arm64:dda3752ab3a912fd"]
+prologue_method = "auto-sanity"
+prologue_outcome = "plausible-entry"
+cross_check_no_reuse = true

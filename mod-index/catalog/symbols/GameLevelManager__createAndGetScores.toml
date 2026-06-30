@@ -1,0 +1,20 @@
+schema_version = 1
+symbol = "GameLevelManager::createAndGetScores"
+
+[signature]
+return = "?"
+params = ["GameLevelManager*", "std::string", "GJScoreType"]
+
+[[offset]]
+gd_version = "2.2081"
+platform = "android-arm64"
+rva = 0x711290
+verified = true
+
+[offset.provenance]
+tier = "symbol-table"
+derivation_method = "android-symbol-table"
+binary_identity = ["android-arm64:dda3752ab3a912fd"]
+prologue_method = "auto-sanity"
+prologue_outcome = "plausible-entry"
+cross_check_no_reuse = true

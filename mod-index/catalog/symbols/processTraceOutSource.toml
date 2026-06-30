@@ -1,0 +1,20 @@
+schema_version = 1
+symbol = "processTraceOutSource"
+
+[signature]
+return = "?"
+params = ["EffectGameObject*", "GameObject*", "std::unordered_set<int, std::hash<int>, std::equal_to<int>, std::allocator<int> >&", "std::vector<ChainNode, std::allocator<ChainNode> >&", "std::vector<std::vector<ChainNode, std::allocator<ChainNode> >, std::allocator<std::vector<ChainNode, std::allocator<ChainNode> > > >&", "std::unordered_set<StateKey, StateKeyHash, std::equal_to<StateKey>, std::allocator<StateKey> >&", "std::unordered_set<StateKey, StateKeyHash, std::equal_to<StateKey>, std::allocator<StateKey> >&", "LevelEditorLayer*", "RemapState const&", "std::vector<std::vector<ChainNode, std::allocator<ChainNode> >, std::allocator<std::vector<ChainNode, std::allocator<ChainNode> > > >&", "std::unordered_map<int, std::unordered_set<int, std::hash<int>, std::equal_to<int>, std::allocator<int> >, std::hash<int>, std::equal_to<int>, std::allocator<std::pair<int const, std::unordered_set<int, std::hash<int>, std::equal_to<int>, std::allocator<int> > > > >&", "bool", "bool", "int"]
+
+[[offset]]
+gd_version = "2.2081"
+platform = "android-arm64"
+rva = 0x67FB34
+verified = true
+
+[offset.provenance]
+tier = "symbol-table"
+derivation_method = "android-symbol-table"
+binary_identity = ["android-arm64:dda3752ab3a912fd"]
+prologue_method = "auto-sanity"
+prologue_outcome = "plausible-entry"
+cross_check_no_reuse = true

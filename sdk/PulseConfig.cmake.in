@@ -1,0 +1,14 @@
+@PACKAGE_INIT@
+
+# Pulse SDK package configuration.
+# Consente a un progetto consumer di fare:
+#     find_package(Pulse REQUIRED)
+#     target_link_libraries(my_mod PRIVATE pulse::sdk)
+#
+# Generato da sdk/PulseConfig.cmake.in via configure_package_config_file
+# (Requisiti 8.1, 8.3). Espone il target importato pulse::sdk con gli header
+# pubblici installati sotto l'include prefix configurato (GNUInstallDirs).
+
+include("${CMAKE_CURRENT_LIST_DIR}/PulseTargets.cmake")
+
+check_required_components(Pulse)

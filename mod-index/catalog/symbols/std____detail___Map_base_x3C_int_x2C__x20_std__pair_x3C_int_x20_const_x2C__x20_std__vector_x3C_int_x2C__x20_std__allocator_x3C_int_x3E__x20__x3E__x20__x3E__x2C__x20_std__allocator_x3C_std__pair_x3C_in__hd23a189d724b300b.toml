@@ -1,0 +1,20 @@
+schema_version = 1
+symbol = "std::__detail::_Map_base<int, std::pair<int const, std::vector<int, std::allocator<int> > >, std::allocator<std::pair<int const, std::vector<int, std::allocator<int> > > >, std::__detail::_Select1st, std::equal_to<int>, std::hash<int>, std::__detail::_Mod_range_hashing, std::__detail::_Default_ranged_hash, std::__detail::_Prime_rehash_policy, std::__detail::_Hashtable_traits<false, false, true>, true>::operator[]"
+
+[signature]
+return = "?"
+params = ["std::__detail::_Map_base<int, std::pair<int const, std::vector<int, std::allocator<int> > >, std::allocator<std::pair<int const, std::vector<int, std::allocator<int> > > >, std::__detail::_Select1st, std::equal_to<int>, std::hash<int>, std::__detail::_Mod_range_hashing, std::__detail::_Default_ranged_hash, std::__detail::_Prime_rehash_policy, std::__detail::_Hashtable_traits<false, false, true>, true>*", "int const&"]
+
+[[offset]]
+gd_version = "2.2081"
+platform = "android-arm64"
+rva = 0x87BD7C
+verified = true
+
+[offset.provenance]
+tier = "symbol-table"
+derivation_method = "android-symbol-table"
+binary_identity = ["android-arm64:dda3752ab3a912fd"]
+prologue_method = "auto-sanity"
+prologue_outcome = "plausible-entry"
+cross_check_no_reuse = true

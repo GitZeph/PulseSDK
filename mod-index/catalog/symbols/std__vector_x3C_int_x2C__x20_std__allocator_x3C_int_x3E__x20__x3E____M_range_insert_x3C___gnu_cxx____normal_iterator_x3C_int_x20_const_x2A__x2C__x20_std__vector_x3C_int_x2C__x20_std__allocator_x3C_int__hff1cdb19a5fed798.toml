@@ -1,0 +1,20 @@
+schema_version = 1
+symbol = "std::vector<int, std::allocator<int> >::_M_range_insert<__gnu_cxx::__normal_iterator<int const*, std::vector<int, std::allocator<int> > > >"
+
+[signature]
+return = "void"
+params = ["std::vector<int, std::allocator<int> >*", "__gnu_cxx::__normal_iterator<int*, std::vector<int, std::allocator<int> > >", "__gnu_cxx::__normal_iterator<int const*, std::vector<int, std::allocator<int> > >", "__gnu_cxx::__normal_iterator<int const*, std::vector<int, std::allocator<int> > >", "std::forward_iterator_tag"]
+
+[[offset]]
+gd_version = "2.2081"
+platform = "android-arm64"
+rva = 0x7720C4
+verified = true
+
+[offset.provenance]
+tier = "symbol-table"
+derivation_method = "android-symbol-table"
+binary_identity = ["android-arm64:dda3752ab3a912fd"]
+prologue_method = "auto-sanity"
+prologue_outcome = "plausible-entry"
+cross_check_no_reuse = true

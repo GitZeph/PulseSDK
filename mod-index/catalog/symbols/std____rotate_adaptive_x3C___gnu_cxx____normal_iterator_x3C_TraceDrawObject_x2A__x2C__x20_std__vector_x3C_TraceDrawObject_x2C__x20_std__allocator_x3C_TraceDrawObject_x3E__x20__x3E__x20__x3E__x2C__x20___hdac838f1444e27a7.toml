@@ -1,0 +1,20 @@
+schema_version = 1
+symbol = "std::__rotate_adaptive<__gnu_cxx::__normal_iterator<TraceDrawObject*, std::vector<TraceDrawObject, std::allocator<TraceDrawObject> > >, TraceDrawObject*, long>"
+
+[signature]
+return = "__gnu_cxx::__normal_iterator<TraceDrawObject*, std::vector<TraceDrawObject, std::allocator<TraceDrawObject> > >"
+params = ["std*", "__gnu_cxx::__normal_iterator<TraceDrawObject*, std::vector<TraceDrawObject, std::allocator<TraceDrawObject> > >", "__gnu_cxx::__normal_iterator<TraceDrawObject*, std::vector<TraceDrawObject, std::allocator<TraceDrawObject> > >", "__gnu_cxx::__normal_iterator<TraceDrawObject*, std::vector<TraceDrawObject, std::allocator<TraceDrawObject> > >", "long", "long", "TraceDrawObject*", "long"]
+
+[[offset]]
+gd_version = "2.2081"
+platform = "android-arm64"
+rva = 0x67A668
+verified = true
+
+[offset.provenance]
+tier = "symbol-table"
+derivation_method = "android-symbol-table"
+binary_identity = ["android-arm64:dda3752ab3a912fd"]
+prologue_method = "auto-sanity"
+prologue_outcome = "plausible-entry"
+cross_check_no_reuse = true

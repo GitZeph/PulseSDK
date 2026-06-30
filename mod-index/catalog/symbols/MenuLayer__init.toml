@@ -1,0 +1,34 @@
+# Catalog_Entry del Prioritized_Target: MenuLayer::init.
+#
+# Fonte di verità versionata (un file per simbolo) consumata da
+# `cli/src/bindings/catalog.rs` (`load_catalog_entry` / `load_catalog`) e
+# pivotata in `.pbind` dal `Binding_Generator`.
+#
+# Ancora il Prioritized_Target (Req 8.5): macOS arm64 (Apple Silicon),
+# GD 2.2081, Steam — `MenuLayer::init` con RVA 0x316688 `verified = true`,
+# ottenuto con la procedura manuale Phase E (otool + cross-check osservativo
+# numerico vs la community binding Geode 2.2081, SENZA riuso di codice).
+schema_version = 1
+symbol = "MenuLayer::init"
+
+# Una sola firma valida per tutte le coppie (Req 1.6).
+# Convenzione "this come primo parametro": MenuLayer::init → bool(MenuLayer*).
+[signature]
+return = "bool"
+params = ["MenuLayer*"]
+
+# Prioritized_Target: (GD 2.2081, macos-arm64). RVA 0x316688 verificato.
+[[offset]]
+gd_version = "2.2081"
+platform   = "macos-arm64"
+rva        = 0x316688
+verified   = true
+
+  # Provenance_Record (Req 10.1): documenta come l'offset è stato ottenuto e
+  # verificato. Il cross-check è solo numerico osservativo (Req 4.6).
+  [offset.provenance]
+  address_source       = "contributor:tomas"
+  cross_check          = "concordant"
+  cross_check_no_reuse = true
+  prologue_method      = "otool-manual"
+  prologue_outcome     = "match"

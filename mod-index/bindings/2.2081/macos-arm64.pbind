@@ -1,0 +1,83 @@
+# mod-index/bindings/2.2081/macos-arm64.pbind
+#
+# Binding_Set_File per (GD_Version 2.2081, platform macos-arm64) — Prioritized_Target.
+# Riferimenti: Req 4.1, 4.2, 4.3, 5.1; design.md sezioni 4.1/4.2 e "Data Models".
+#
+# =====================================================================
+#  STATO: VERIFICATO (verified = true) — offset reale di MenuLayer::init
+# =====================================================================
+#
+# `offset` e' l'RVA (relativo alla base dell'immagine Mach-O) di
+# `MenuLayer::init` per (GD 2.2081, macos-arm64). Convenzione identica a quella
+# delle community bindings Geode (campo `m1`): RVA = VA_funzione - base_immagine
+# (per l'eseguibile arm64 di GD la base preferita e' 0x100000000).
+#
+# VERIFICA ESEGUITA contro il binario reale dell'User (Steam, GD 2.2081):
+#   * RVA candidato = 0x316688 (cross-check OSSERVATIVO con la community binding
+#     Geode 2.2081 `m1`; NESSUN riuso di codice — solo l'indirizzo numerico,
+#     Req 27 della spec sorgente);
+#   * VA assoluta nel binario = 0x100000000 + 0x316688 = 0x100316688;
+#   * disassemblato con `otool -arch arm64 -tv` a 0x100316688: prologo arm64
+#     conforme a una funzione non-leaf (sub sp,#0xd0; salvataggio dei registri
+#     callee-saved d/x; stp x29,x30; add x29,sp; mov x19,x0 (stash di `this`);
+#     bl <CCLayer::init>; cbz w0,<fail> == "if (!Super::init()) return false;").
+#     Pattern coerente con MenuLayer::init(MenuLayer*).
+#
+# A runtime il Loader_Artifact RIBASA questo RVA sull'header realmente mappato
+# dell'eseguibile principale (`_dyld_get_image_header(0)`, che include lo slide
+# ASLR) prima di installare l'hook: indirizzo_assoluto = imageBase + offset
+# (vedi loader/core/runtime_entry.cpp).
+#
+# ---------------------------------------------------------------------
+#  PROCEDURA MANUALE DI VERIFICA (richiede il binario reale di GD)
+# ---------------------------------------------------------------------
+# Eseguire sulla macchina macOS dell'User con GD 2.2081 (Steam) installato.
+# Vedi anche tools/extract_menulayer_init_offset.sh per i comandi otool/nm.
+#
+# 1. LOCALIZZARE L'IMMAGINE MACH-O di GD 2.2081 macos-arm64 (eseguibile dentro
+#    "Geometry Dash.app/Contents/MacOS/Geometry Dash"). Confermare cputype
+#    arm64 (ARM64) ed identificare la base della sezione __TEXT.
+#
+# 2. RISOLVERE `MenuLayer::init`:
+#    - se il simbolo C++ mangled (es. _ZN9MenuLayer4initEv) e' presente nella
+#      symbol table: leggerne l'indirizzo virtuale con `nm`/`otool -Iv`;
+#    - se strippato: pattern-scan del prologo della funzione (firma di byte
+#      calibrata su 2.2081) per individuare l'indirizzo della funzione.
+#
+# 3. CALCOLARE L'OFFSET RELATIVO = indirizzo_virtuale_funzione - base_immagine
+#    (la base dell'immagine Mach-O, NON la base della sola sezione __TEXT a
+#    meno che il modello dei bindings non lo richieda; allineare con
+#    version_detector / la convenzione usata da EmbeddedBindingsProvider).
+#
+# 4. VERIFICARE IL PROLOGO disassemblando i primi byte all'offset risolto
+#    (`otool -tv` / disassembler) e confrontandolo con la firma attesa del
+#    prologo arm64 (es. salvataggio frame `stp x29, x30, [sp, #-N]!` ...).
+#    Cross-check OSSERVATIVO con il riferimento concettuale Geode per 2.2081
+#    (solo verifica visiva, NESSUN riuso di codice — Req 27 spec sorgente).
+#
+# 5. AGGIORNARE QUESTO FILE:
+#    - sostituire `offset` con l'offset relativo reale (non-zero, != sentinel);
+#    - impostare `verified = true`;
+#    - confermare `return`/`params` della firma osservata.
+#    Solo allora `binding_verifier` marchera' il binding come resolved (Req 4.3)
+#    e il loader potra' installare l'hook su MenuLayer::init (Req 9.1).
+#
+# Un offset e' "verificato e non-placeholder" (Req 4.2) SSE: non-zero, diverso
+# dal sentinel del set embedded, e con prologo conforme alla firma registrata.
+# ---------------------------------------------------------------------
+
+pbind_version = 1
+gd_version = 2.2081
+platform = macos-arm64
+
+[function]
+symbol = MenuLayer::init
+# RVA verificato di MenuLayer::init per (GD 2.2081, macos-arm64).
+# VA assoluta nel binario = 0x100000000 + 0x316688 = 0x100316688 (prologo
+# arm64 confermato via otool). Ribasato a runtime sull'header mappato.
+offset = 0x316688
+return = bool
+params = MenuLayer*
+# verified = true → offset verificato contro il binario reale (prologo
+# conforme); binding_verifier marchera' il binding come resolved (Req 4.3).
+verified = true

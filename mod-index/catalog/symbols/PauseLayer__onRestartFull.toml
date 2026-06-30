@@ -1,0 +1,20 @@
+schema_version = 1
+symbol = "PauseLayer::onRestartFull"
+
+[signature]
+return = "?"
+params = ["PauseLayer*", "cocos2d::CCObject*"]
+
+[[offset]]
+gd_version = "2.2081"
+platform = "android-arm64"
+rva = 0x6C6B20
+verified = true
+
+[offset.provenance]
+tier = "symbol-table"
+derivation_method = "android-symbol-table"
+binary_identity = ["android-arm64:dda3752ab3a912fd"]
+prologue_method = "auto-sanity"
+prologue_outcome = "plausible-entry"
+cross_check_no_reuse = true

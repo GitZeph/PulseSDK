@@ -1,0 +1,20 @@
+schema_version = 1
+symbol = "pugi::xml_writer_file::~xml_writer_file"
+
+[signature]
+return = "?"
+params = ["pugi::xml_writer_file*"]
+
+[[offset]]
+gd_version = "2.2081"
+platform = "android-arm64"
+rva = 0xB4AB64
+verified = false
+
+[offset.provenance]
+tier = "symbol-table"
+derivation_method = "android-symbol-table"
+binary_identity = ["android-arm64:dda3752ab3a912fd"]
+prologue_method = "auto-sanity"
+prologue_outcome = "not-plausible"
+cross_check_no_reuse = true

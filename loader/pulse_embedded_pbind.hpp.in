@@ -1,0 +1,23 @@
+// pulse_embedded_pbind.hpp — HEADER GENERATO (configure_file) per il
+// Loader_Artifact. Incorpora a COMPILE TIME il contenuto del Binding_Set_File
+// verificato `mod-index/bindings/2.2081/macos-arm64.pbind`, così il runtime non
+// esegue alcun lookup su file dopo l'iniezione in Geometry Dash.
+//
+// Questo file è prodotto da CMake (loader/CMakeLists.txt, ramo
+// PULSE_BUILD_LOADER_ARTIFACT) sostituendo il segnaposto del contenuto con il
+// testo del `.pbind`. Se il `.pbind` è assente al configure time, il contenuto è
+// una stringa vuota e il flusso di runtime fallisce in modo fail-open (zero hook).
+//
+// NON modificare a mano: ogni modifica viene sovrascritta alla riconfigurazione.
+#ifndef PULSE_EMBEDDED_PBIND_HPP
+#define PULSE_EMBEDDED_PBIND_HPP
+
+namespace pulse::loader {
+
+// Contenuto testuale del `.pbind` verificato incorporato nell'artefatto. Il
+// delimitatore raw `PULSE_PBIND` è scelto per non collidere con il contenuto.
+inline constexpr const char kEmbeddedPbind[] = R"PULSE_PBIND(@PULSE_EMBEDDED_PBIND_CONTENT@)PULSE_PBIND";
+
+}  // namespace pulse::loader
+
+#endif  // PULSE_EMBEDDED_PBIND_HPP

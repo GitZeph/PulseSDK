@@ -1,0 +1,27 @@
+# Surface_Manifest — il Seed_Surface della GD_API_Surface.
+#
+# Selezione curata e prioritizzata di classi/metodi/hook-point di Geometry Dash
+# consumata da `cli/src/surface/manifest.rs` (`load_manifest`) e fusa col
+# `Binding_Catalog` (RIUSO `load_catalog`) dal `Surface_Compiler` per produrre la
+# Surface_IR e, da questa, l'API SDK C++ header-only (`pulse surface generate`).
+#
+# **Confine preciso (Req 2.3):** il manifest **non contiene offset né firme**.
+# Gli offset e la `Signature` restano di esclusiva proprietà del
+# `Binding_Catalog` — qui la superficie li *legge*, non li *possiede*. La
+# `Catalog_Entry` di `MenuLayer::init` (RVA 0x316688, `verified = true` per
+# (2.2081, macos-arm64)) è già prodotta dalla `bindings-pipeline` ed è **riusata**
+# senza essere riseminata (vedi `mod-index/catalog/symbols/MenuLayer__init.toml`).
+#
+# Seed del Prioritized_Target (Req 1.6, 7.5): macOS arm64 (Apple Silicon),
+# GD 2.2081, Steam — `MenuLayer::init` come `Hook_Point` dichiarabile con
+# `PULSE_GD_HOOK`, che genera un binding verificato end-to-end.
+schema_version = 1
+
+[[class]]
+name = "MenuLayer"            # Class_Binding (raggruppamento)
+cpp_type = "MenuLayer"        # tipo C++ generato (opaco, forward-declared)
+
+  [[class.method]]
+  symbol   = "MenuLayer::init"   # join 1:1 con la Catalog_Entry (Req 1.2, 2.1)
+  priority = 100                 # valore ordinabile della Surface_Selection (Req 1.3)
+  hook     = true                # Hook_Point dichiarabile con PULSE_GD_HOOK (Req 1.1)

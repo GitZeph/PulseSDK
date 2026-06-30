@@ -1,0 +1,20 @@
+schema_version = 1
+symbol = "{virtual override thunk({offset(-640)}, MusicBrowser::getSelectedCellIdx)}"
+
+[signature]
+return = "?"
+params = ["{offset(-640)}", "MusicBrowser::getSelectedCellIdx()"]
+
+[[offset]]
+gd_version = "2.2081"
+platform = "android-arm64"
+rva = 0xA59E54
+verified = true
+
+[offset.provenance]
+tier = "symbol-table"
+derivation_method = "android-symbol-table"
+binary_identity = ["android-arm64:dda3752ab3a912fd"]
+prologue_method = "auto-sanity"
+prologue_outcome = "plausible-entry"
+cross_check_no_reuse = true

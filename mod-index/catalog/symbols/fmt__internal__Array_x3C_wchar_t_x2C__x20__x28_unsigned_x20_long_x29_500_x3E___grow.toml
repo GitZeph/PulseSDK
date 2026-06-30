@@ -1,0 +1,20 @@
+schema_version = 1
+symbol = "fmt::internal::Array<wchar_t, (unsigned long)500>::grow"
+
+[signature]
+return = "?"
+params = ["fmt::internal::Array<wchar_t, (unsigned long)500>*", "unsigned long"]
+
+[[offset]]
+gd_version = "2.2081"
+platform = "android-arm64"
+rva = 0xB68338
+verified = true
+
+[offset.provenance]
+tier = "symbol-table"
+derivation_method = "android-symbol-table"
+binary_identity = ["android-arm64:dda3752ab3a912fd"]
+prologue_method = "auto-sanity"
+prologue_outcome = "plausible-entry"
+cross_check_no_reuse = true

@@ -1,0 +1,20 @@
+schema_version = 1
+symbol = "findNextHighestID"
+
+[signature]
+return = "?"
+params = ["int", "int", "std::unordered_set<int, std::hash<int>, std::equal_to<int>, std::allocator<int> >&"]
+
+[[offset]]
+gd_version = "2.2081"
+platform = "android-arm64"
+rva = 0x65CBD8
+verified = true
+
+[offset.provenance]
+tier = "symbol-table"
+derivation_method = "android-symbol-table"
+binary_identity = ["android-arm64:dda3752ab3a912fd"]
+prologue_method = "auto-sanity"
+prologue_outcome = "plausible-entry"
+cross_check_no_reuse = true

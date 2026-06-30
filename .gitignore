@@ -1,0 +1,32 @@
+# --- Game binaries: NEVER commit these ---
+# Pulse derives bindings from GD's own binaries, but we do NOT ship them.
+# Bring your own legally-owned copy. Everything under public/ is RobTop's, not ours.
+/public/
+*.so
+*.dylib
+*.a
+*.exe
+*.dll
+*.framework/
+# the macOS GD executable people drop in to run the extractor
+Geometry Dash
+libcocos2dcpp.so
+
+# Build output (CMake is out-of-source — see the root CMakeLists.txt)
+/build/
+/build-*/
+/out/
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+
+# Rust CLI build output
+/cli/target/
+
+# OS / editor noise
+.DS_Store
+.idea/
+.vscode/
+
+# Kiro spec workspace (internal planning notes, not part of the public project)
+.kiro

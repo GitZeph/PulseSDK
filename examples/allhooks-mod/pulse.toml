@@ -1,0 +1,20 @@
+schema_version = 1
+
+[mod]
+id = "com.pulse.allhooks"
+version = "0.1.0"
+name = "All Hooks Demo"
+type = "native"
+
+# Entry point invoked once by the Mod_Loader on enable. MUST match the
+# exported (extern "C") symbol in src/mod.cpp.
+[[entry_points]]
+kind = "init"
+symbol = "pulse_mod_init"
+
+# Compatibility with the Runtime_Context detected from the Mach-O
+# (GD 2.2081, macOS arm64). Endpoints inclusive.
+[compat]
+platform = "macos-arm64"
+gd_min = "2.2081.0"
+gd_max = "2.2081.0"

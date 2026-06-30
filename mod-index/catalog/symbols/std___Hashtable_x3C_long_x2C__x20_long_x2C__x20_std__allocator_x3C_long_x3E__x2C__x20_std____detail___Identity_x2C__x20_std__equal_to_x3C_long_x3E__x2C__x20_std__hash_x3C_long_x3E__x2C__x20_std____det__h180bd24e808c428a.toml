@@ -1,0 +1,20 @@
+schema_version = 1
+symbol = "std::_Hashtable<long, long, std::allocator<long>, std::__detail::_Identity, std::equal_to<long>, std::hash<long>, std::__detail::_Mod_range_hashing, std::__detail::_Default_ranged_hash, std::__detail::_Prime_rehash_policy, std::__detail::_Hashtable_traits<false, true, true> >::_M_insert<long const&, std::__detail::_AllocNode<std::allocator<std::__detail::_Hash_node<long, false> > > >"
+
+[signature]
+return = "std::pair<std::__detail::_Node_iterator<long, true, false>, bool>"
+params = ["std::_Hashtable<long, long, std::allocator<long>, std::__detail::_Identity, std::equal_to<long>, std::hash<long>, std::__detail::_Mod_range_hashing, std::__detail::_Default_ranged_hash, std::__detail::_Prime_rehash_policy, std::__detail::_Hashtable_traits<false, true, true> >*", "long const&", "std::__detail::_AllocNode<std::allocator<std::__detail::_Hash_node<long, false> > > const&", "std::integral_constant<bool, true>"]
+
+[[offset]]
+gd_version = "2.2081"
+platform = "android-arm64"
+rva = 0x675648
+verified = true
+
+[offset.provenance]
+tier = "symbol-table"
+derivation_method = "android-symbol-table"
+binary_identity = ["android-arm64:dda3752ab3a912fd"]
+prologue_method = "auto-sanity"
+prologue_outcome = "plausible-entry"
+cross_check_no_reuse = true

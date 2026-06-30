@@ -1,0 +1,20 @@
+schema_version = 1
+symbol = "cocos2d::CCLayerGradient::initWithColor"
+
+[signature]
+return = "?"
+params = ["cocos2d::CCLayerGradient*", "cocos2d::_ccColor4B const&", "cocos2d::_ccColor4B const&"]
+
+[[offset]]
+gd_version = "2.2081"
+platform = "android-arm64"
+rva = 0xAE9F34
+verified = true
+
+[offset.provenance]
+tier = "symbol-table"
+derivation_method = "android-symbol-table"
+binary_identity = ["android-arm64:dda3752ab3a912fd"]
+prologue_method = "auto-sanity"
+prologue_outcome = "plausible-entry"
+cross_check_no_reuse = true

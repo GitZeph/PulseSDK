@@ -1,0 +1,20 @@
+schema_version = 1
+symbol = "ListButtonBar::create"
+
+[signature]
+return = "?"
+params = ["ListButtonBar*", "cocos2d::CCArray*", "cocos2d::CCPoint", "int", "int", "float", "float", "float", "float", "int"]
+
+[[offset]]
+gd_version = "2.2081"
+platform = "android-arm64"
+rva = 0x5A90E8
+verified = true
+
+[offset.provenance]
+tier = "symbol-table"
+derivation_method = "android-symbol-table"
+binary_identity = ["android-arm64:dda3752ab3a912fd"]
+prologue_method = "auto-sanity"
+prologue_outcome = "plausible-entry"
+cross_check_no_reuse = true

@@ -1,0 +1,5 @@
+# Geode_Reference_Table — GD 2.2081 / macos-arm64
+# Solo indirizzi numerici osservativi delle community bindings Geode (campo m1).
+# Nessun riuso di codice Geode: il Geode_Firewall accetta SOLO righe
+# "chiave = numero" e rifiuta qualunque sorgente/header/struttura.
+"MenuLayer::init" = 0x316688
