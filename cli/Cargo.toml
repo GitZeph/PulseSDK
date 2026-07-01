@@ -1,6 +1,6 @@
 [package]
 name = "pulse-cli"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 description = "Pulse CLI — scaffold, build e publish delle mod Pulse (Req 14, 26.6)"
 license = "MIT"
