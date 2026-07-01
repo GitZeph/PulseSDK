@@ -16,6 +16,8 @@ On macOS, via Homebrew — no cloning, no Rust setup, no env-var wrangling:
 brew install GitZeph/pulse/pulse
 ```
 
+On Apple Silicon that pulls a prebuilt binary and installs in a couple of seconds — no compile. (Intel Macs build from source automatically.)
+
 Then:
 
 ```sh
