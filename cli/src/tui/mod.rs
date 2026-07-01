@@ -23,6 +23,7 @@ pub mod menu;
 
 use std::io::{self, IsTerminal, Stdout, Write};
 use std::path::Path;
+use std::time::{Duration, Instant};
 
 use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
 use crossterm::terminal::{
@@ -233,6 +234,10 @@ struct App {
     prompt: Option<Prompt>,
     /// Messaggio transitorio (es. "coming soon"); un tasto qualsiasi lo chiude.
     toast: Option<String>,
+    /// Istante d'avvio: la fase del battito del banner deriva da
+    /// `start.elapsed()`, così l'animazione è liscia e legata al tempo di
+    /// parete (non al conteggio dei frame).
+    start: Instant,
 }
 
 impl App {
@@ -248,6 +253,7 @@ impl App {
             show_help: false,
             prompt: None,
             toast: None,
+            start: Instant::now(),
         }
     }
 
@@ -278,18 +284,29 @@ impl App {
         }
     }
 
-    /// Ciclo principale: disegna, legge un evento, aggiorna.
+    /// Ciclo principale: disegna a ~20 FPS, gestisce gli eventi appena
+    /// disponibili e fa avanzare l'animazione del battito in base al tempo.
+    ///
+    /// A differenza di un `event::read()` bloccante, qui si usa
+    /// `event::poll(POLL_INTERVAL)`: se un evento è pronto entro l'intervallo lo
+    /// si legge e gestisce **esattamente come prima** (nessun cambiamento nella
+    /// gestione dei tasti, quindi q/Esc/Ctrl+C restano istantanei); altrimenti,
+    /// allo scadere del timeout, il loop ridisegna comunque così il banner
+    /// pulsa in modo fluido. ~50ms mantiene la CPU bassa senza busy-loop.
     fn run(&mut self, terminal: &mut Tui) -> anyhow::Result<()> {
+        const POLL_INTERVAL: Duration = Duration::from_millis(50);
         loop {
             terminal.draw(|f| ui(f, self))?;
-            let Event::Key(key) = event::read()? else {
-                continue;
-            };
-            if key.kind != KeyEventKind::Press {
-                continue;
-            }
-            if self.handle_key(key, terminal)? {
-                return Ok(());
+            if event::poll(POLL_INTERVAL)? {
+                let Event::Key(key) = event::read()? else {
+                    continue;
+                };
+                if key.kind != KeyEventKind::Press {
+                    continue;
+                }
+                if self.handle_key(key, terminal)? {
+                    return Ok(());
+                }
             }
         }
     }
@@ -527,7 +544,7 @@ fn ui(f: &mut Frame, app: &App) {
         ])
         .split(f.area());
 
-    render_banner(f, chunks[0]);
+    render_banner(f, chunks[0], app);
     render_body(f, chunks[1], app);
     render_footer(f, chunks[2], app);
 
@@ -539,12 +556,44 @@ fn ui(f: &mut Frame, app: &App) {
     }
 }
 
-/// Banner ASCII in verde Pulse + tagline.
-fn render_banner(f: &mut Frame, area: Rect) {
+/// Banner ASCII con animazione a battito + tagline.
+///
+/// Ogni glifo del banner diventa uno `Span` colorato per colonna in base
+/// all'onda di luce che scorre (vedi [`banner::pulse_char_rgb`]): verde profondo
+/// a riposo → verde Pulse brillante → cresta menta al picco. La fase deriva da
+/// `app.start.elapsed()`, quindi lo sweep è liscio e legato al tempo di parete.
+/// La tagline resta in verde attenuato corsivo (calma, non distrae).
+fn render_banner(f: &mut Frame, area: Rect, app: &App) {
+    let elapsed = app.start.elapsed();
+    // Larghezza di riferimento dell'onda: la riga più larga del banner, così la
+    // fronte d'onda è coerente su tutte le righe.
+    let banner_width = banner::PULSE_BANNER
+        .lines()
+        .map(|l| l.chars().count())
+        .max()
+        .unwrap_or(1);
+
     let mut lines: Vec<Line> = banner::PULSE_BANNER
         .lines()
-        .map(|l| Line::styled(l, Style::default().fg(PULSE_GREEN).add_modifier(Modifier::BOLD)))
+        .enumerate()
+        .map(|(row, text)| {
+            let spans: Vec<Span> = text
+                .chars()
+                .enumerate()
+                .map(|(col, ch)| {
+                    let (r, g, b) = banner::pulse_char_rgb(row, col, banner_width, elapsed);
+                    Span::styled(
+                        ch.to_string(),
+                        Style::default()
+                            .fg(Color::Rgb(r, g, b))
+                            .add_modifier(Modifier::BOLD),
+                    )
+                })
+                .collect();
+            Line::from(spans)
+        })
         .collect();
+
     lines.push(Line::styled(
         banner::PULSE_TAGLINE,
         Style::default().fg(PULSE_GREEN_DIM).add_modifier(Modifier::ITALIC),
