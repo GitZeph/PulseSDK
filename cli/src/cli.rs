@@ -30,7 +30,10 @@ pub struct Cli {
 pub enum Command {
     /// Genera lo scaffold di una nuova mod (Req 14.1, 14.2) — task 14.2.
     New {
-        /// Directory di destinazione della nuova mod.
+        /// Nome della cartella del progetto (es. `my-mod`).
+        name: String,
+        /// Directory in cui creare la cartella del progetto (default: directory corrente).
+        #[arg(default_value = ".")]
         path: PathBuf,
         /// Identificatore della mod (es. com.example.mymod).
         #[arg(long)]
@@ -149,7 +152,7 @@ impl Cli {
             None => return crate::tui::launch(),
         };
         match command {
-            Command::New { path, id } => run_new(&path, id.as_deref()),
+            Command::New { name, path, id } => run_new(&name, &path, id.as_deref()),
             Command::Build { path } => run_build(&path),
             Command::Publish { path } => run_publish(&path),
             Command::Install {
@@ -170,12 +173,15 @@ impl Cli {
     }
 }
 
-/// Esegue `pulse new`: genera lo scaffold di una nuova mod (Req 14.1, 14.2).
+/// Esegue `pulse new <name> [path]`: genera lo scaffold di una nuova mod
+/// nella cartella `parent/<name>` (Req 14.1, 14.2).
 ///
+/// `parent` è la directory in cui creare la cartella del progetto (default: `.`).
 /// Estratto come funzione pubblica così che la TUI possa invocare la stessa
 /// logica dei sottocomandi senza duplicarla né lanciare un secondo processo.
-pub fn run_new(path: &std::path::Path, id: Option<&str>) -> anyhow::Result<()> {
-    let outcome = scaffold::scaffold_new(path, id)?;
+pub fn run_new(name: &str, parent: &std::path::Path, id: Option<&str>) -> anyhow::Result<()> {
+    let dest = parent.join(name);
+    let outcome = scaffold::scaffold_new(&dest, id)?;
     println!(
         "Creata nuova mod Pulse '{}' in {}",
         outcome.mod_id,
@@ -1882,9 +1888,23 @@ mod tests {
         let cli = Cli::try_parse_from(["pulse", "new", "mymod", "--id", "com.example.mymod"])
             .expect("new dovrebbe parsare");
         match cli.command.unwrap() {
-            Command::New { path, id } => {
-                assert_eq!(path.to_str().unwrap(), "mymod");
+            Command::New { name, path, id } => {
+                assert_eq!(name, "mymod");
+                assert_eq!(path.to_str().unwrap(), ".");
                 assert_eq!(id.as_deref(), Some("com.example.mymod"));
+            }
+            other => panic!("comando inatteso: {other:?}"),
+        }
+    }
+
+    #[test]
+    fn parses_new_subcommand_with_explicit_path() {
+        let cli = Cli::try_parse_from(["pulse", "new", "mymod", "/some/dir", "--id", "com.x"])
+            .expect("new con path esplicito dovrebbe parsare");
+        match cli.command.unwrap() {
+            Command::New { name, path, .. } => {
+                assert_eq!(name, "mymod");
+                assert_eq!(path.to_str().unwrap(), "/some/dir");
             }
             other => panic!("comando inatteso: {other:?}"),
         }

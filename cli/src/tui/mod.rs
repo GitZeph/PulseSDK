@@ -210,12 +210,20 @@ impl Prompt {
             Action::New => Some(Prompt {
                 action,
                 title: "pulse new — scaffold a new mod".to_string(),
-                fields: vec![Field {
-                    label: "Project name / path".to_string(),
-                    value: String::new(),
-                    kind: FieldKind::Text,
-                    required: true,
-                }],
+                fields: vec![
+                    Field {
+                        label: "Project name".to_string(),
+                        value: String::new(),
+                        kind: FieldKind::Text,
+                        required: true,
+                    },
+                    Field {
+                        label: "Parent directory (empty = current dir)".to_string(),
+                        value: String::new(),
+                        kind: FieldKind::Text,
+                        required: false,
+                    },
+                ],
                 active: 0,
             }),
             Action::Install => Some(Prompt {
@@ -481,7 +489,9 @@ impl App {
         let result: anyhow::Result<()> = match action {
             Action::New => {
                 let name = fields[0].value.trim();
-                cli::run_new(Path::new(name), None)
+                let parent = fields[1].value.trim();
+                let parent_path = if parent.is_empty() { Path::new(".") } else { Path::new(parent) };
+                cli::run_new(name, parent_path, None)
             }
             Action::Build => cli::run_build(Path::new(".")),
             Action::Install => {
@@ -530,7 +540,15 @@ impl App {
 /// Descrive l'invocazione `pulse …` effettiva a partire dai campi raccolti.
 fn describe_invocation(action: Action, fields: &[Field]) -> String {
     match action {
-        Action::New => format!("pulse new {}", fields[0].value.trim()),
+        Action::New => {
+            let parent = fields.get(1).map(|f| f.value.trim()).unwrap_or("");
+            let name = fields[0].value.trim();
+            if parent.is_empty() {
+                format!("pulse new {name}")
+            } else {
+                format!("pulse new {name} {parent}")
+            }
+        }
         Action::Build => "pulse build".to_string(),
         Action::Install => {
             let native = if fields[2].value == "yes" { " --native" } else { "" };
