@@ -22,7 +22,7 @@ use crate::surface;
 #[command(name = "pulse", version, about, long_about = None)]
 pub struct Cli {
     #[command(subcommand)]
-    pub command: Command,
+    pub command: Option<Command>,
 }
 
 /// Sottocomandi della CLI (Req 14: new/build/publish).
@@ -102,20 +102,17 @@ pub enum Command {
 
 impl Cli {
     /// Esegue il comando selezionato.
+    ///
+    /// Se nessun sottocomando è stato fornito (`command == None`), avvia la
+    /// TUI full-screen interattiva ([`crate::tui::launch`]); altrimenti esegue
+    /// il sottocomando come di consueto.
     pub fn run(self) -> anyhow::Result<()> {
-        match self.command {
-            Command::New { path, id } => {
-                let outcome = scaffold::scaffold_new(&path, id.as_deref())?;
-                println!(
-                    "Creata nuova mod Pulse '{}' in {}",
-                    outcome.mod_id,
-                    outcome.project_dir.display()
-                );
-                for file in &outcome.created_files {
-                    println!("  + {file}");
-                }
-                Ok(())
-            }
+        let command = match self.command {
+            Some(command) => command,
+            None => return crate::tui::launch(),
+        };
+        match command {
+            Command::New { path, id } => run_new(&path, id.as_deref()),
             Command::Build { path } => run_build(&path),
             Command::Publish { path } => run_publish(&path),
             Command::Install {
@@ -130,12 +127,29 @@ impl Cli {
     }
 }
 
+/// Esegue `pulse new`: genera lo scaffold di una nuova mod (Req 14.1, 14.2).
+///
+/// Estratto come funzione pubblica così che la TUI possa invocare la stessa
+/// logica dei sottocomandi senza duplicarla né lanciare un secondo processo.
+pub fn run_new(path: &std::path::Path, id: Option<&str>) -> anyhow::Result<()> {
+    let outcome = scaffold::scaffold_new(path, id)?;
+    println!(
+        "Creata nuova mod Pulse '{}' in {}",
+        outcome.mod_id,
+        outcome.project_dir.display()
+    );
+    for file in &outcome.created_files {
+        println!("  + {file}");
+    }
+    Ok(())
+}
+
 /// Esegue `pulse build`: valida il manifest, compila e produce il `.pulse`.
 ///
 /// Su manifest non valido (Req 14.4) o compilazione fallita (Req 14.5) NON
 /// viene prodotto alcun pacchetto e l'errore riporta, rispettivamente, l'elenco
 /// dei campi non conformi o l'elenco delle cause.
-fn run_build(path: &std::path::Path) -> anyhow::Result<()> {
+pub fn run_build(path: &std::path::Path) -> anyhow::Result<()> {
     match builder::build(path) {
         Ok(outcome) => {
             println!(
@@ -223,7 +237,7 @@ fn run_publish(path: &std::path::Path) -> anyhow::Result<()> {
 /// ([`installer::install`]). In caso di successo stampa l'elenco completo dei
 /// file modificati (Req 7.7); su [`InstallError`] interrompe con un messaggio
 /// chiaro (la `Display` dell'errore è già descrittiva).
-fn run_install(gd: &std::path::Path, artifact: &std::path::Path, native: bool) -> anyhow::Result<()> {
+pub fn run_install(gd: &std::path::Path, artifact: &std::path::Path, native: bool) -> anyhow::Result<()> {
     let result = if native {
         installer::install_native(gd, artifact)
     } else {
@@ -249,7 +263,7 @@ fn run_install(gd: &std::path::Path, artifact: &std::path::Path, native: bool) -
 ///
 /// In caso di successo stampa l'elenco completo dei file ripristinati/eliminati
 /// (Req 7.7); su [`InstallError`] interrompe con un messaggio chiaro.
-fn run_uninstall(gd: &std::path::Path) -> anyhow::Result<()> {
+pub fn run_uninstall(gd: &std::path::Path) -> anyhow::Result<()> {
     match installer::uninstall(gd) {
         Ok(restored) => {
             println!(
@@ -1597,7 +1611,7 @@ mod tests {
     fn parses_new_subcommand() {
         let cli = Cli::try_parse_from(["pulse", "new", "mymod", "--id", "com.example.mymod"])
             .expect("new dovrebbe parsare");
-        match cli.command {
+        match cli.command.unwrap() {
             Command::New { path, id } => {
                 assert_eq!(path.to_str().unwrap(), "mymod");
                 assert_eq!(id.as_deref(), Some("com.example.mymod"));
@@ -1609,10 +1623,10 @@ mod tests {
     #[test]
     fn parses_build_and_publish_defaults() {
         let build = Cli::try_parse_from(["pulse", "build"]).unwrap();
-        assert!(matches!(build.command, Command::Build { .. }));
+        assert!(matches!(build.command, Some(Command::Build { .. })));
 
         let publish = Cli::try_parse_from(["pulse", "publish"]).unwrap();
-        assert!(matches!(publish.command, Command::Publish { .. }));
+        assert!(matches!(publish.command, Some(Command::Publish { .. })));
     }
 
     #[test]
@@ -1626,7 +1640,7 @@ mod tests {
             "/y.dylib",
         ])
         .expect("install dovrebbe parsare");
-        match cli.command {
+        match cli.command.unwrap() {
             Command::Install {
                 gd,
                 artifact,
@@ -1652,7 +1666,7 @@ mod tests {
             "--native",
         ])
         .expect("install --native dovrebbe parsare");
-        match cli.command {
+        match cli.command.unwrap() {
             Command::Install {
                 gd,
                 artifact,
@@ -1670,7 +1684,7 @@ mod tests {
     fn parses_uninstall_subcommand() {
         let cli = Cli::try_parse_from(["pulse", "uninstall", "--gd", "/x.app"])
             .expect("uninstall dovrebbe parsare");
-        match cli.command {
+        match cli.command.unwrap() {
             Command::Uninstall { gd } => {
                 assert_eq!(gd.to_str().unwrap(), "/x.app");
             }
@@ -1694,7 +1708,7 @@ mod tests {
             "/mod-index",
         ])
         .expect("bindings generate dovrebbe parsare");
-        match cli.command {
+        match cli.command.unwrap() {
             Command::Bindings {
                 action:
                     BindingsCommand::Generate {
@@ -1731,7 +1745,7 @@ mod tests {
                 raw,
             ])
             .unwrap_or_else(|e| panic!("verify-prologue --method {raw} dovrebbe parsare: {e}"));
-            match cli.command {
+            match cli.command.unwrap() {
                 Command::Bindings {
                     action: BindingsCommand::VerifyPrologue { method, .. },
                 } => assert_eq!(method, expected),
@@ -1760,7 +1774,7 @@ mod tests {
             "macos-arm64",
         ])
         .expect("bindings add dovrebbe parsare");
-        match cli.command {
+        match cli.command.unwrap() {
             Command::Bindings {
                 action:
                     BindingsCommand::Add {
@@ -1787,9 +1801,9 @@ mod tests {
         let lint = Cli::try_parse_from(["pulse", "bindings", "lint", "/p.pbind"]).unwrap();
         assert!(matches!(
             lint.command,
-            Command::Bindings {
+            Some(Command::Bindings {
                 action: BindingsCommand::Lint { .. }
-            }
+            })
         ));
 
         let prov = Cli::try_parse_from([
@@ -1808,9 +1822,9 @@ mod tests {
         .unwrap();
         assert!(matches!(
             prov.command,
-            Command::Bindings {
+            Some(Command::Bindings {
                 action: BindingsCommand::Provenance { .. }
-            }
+            })
         ));
     }
 
@@ -1841,7 +1855,7 @@ mod tests {
     fn parses_surface_generate_with_defaults() {
         let cli = Cli::try_parse_from(["pulse", "surface", "generate"])
             .expect("surface generate dovrebbe parsare con i default");
-        match cli.command {
+        match cli.command.unwrap() {
             Command::Surface {
                 action:
                     SurfaceCommand::Generate {
@@ -1878,7 +1892,7 @@ mod tests {
             "--strict",
         ])
         .expect("surface generate dovrebbe parsare con argomenti espliciti");
-        match cli.command {
+        match cli.command.unwrap() {
             Command::Surface {
                 action:
                     SurfaceCommand::Generate {
@@ -1901,7 +1915,7 @@ mod tests {
     fn parses_surface_compile_with_defaults() {
         let cli = Cli::try_parse_from(["pulse", "surface", "compile"])
             .expect("surface compile dovrebbe parsare con i default");
-        match cli.command {
+        match cli.command.unwrap() {
             Command::Surface {
                 action:
                     SurfaceCommand::Compile {
@@ -1927,7 +1941,7 @@ mod tests {
     fn parses_surface_lint_and_validate() {
         let lint = Cli::try_parse_from(["pulse", "surface", "lint"])
             .expect("surface lint dovrebbe parsare con i default");
-        match lint.command {
+        match lint.command.unwrap() {
             Command::Surface {
                 action:
                     SurfaceCommand::Lint {
@@ -1956,9 +1970,9 @@ mod tests {
         .expect("surface validate dovrebbe parsare");
         assert!(matches!(
             validate.command,
-            Command::Surface {
+            Some(Command::Surface {
                 action: SurfaceCommand::Validate { .. }
-            }
+            })
         ));
     }
 }

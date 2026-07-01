@@ -47,6 +47,13 @@ cpp_demangle = "0.5"
 yaxpeax-arch = { version = "0.3", default-features = false }
 yaxpeax-arm = { version = "0.3", default-features = false }
 yaxpeax-x86 = { version = "2", default-features = false }
+# TUI full-screen interattiva della CLI (`pulse` senza sottocomando): rendering
+# a widget su terminale alternato + gestione eventi/raw-mode. `ratatui` 0.29
+# usa internamente `crossterm` 0.28, quindi le due versioni sono pinnate in
+# coppia per garantire tipi compatibili (backend + eventi). Versioni esatte per
+# riproducibilità della build CLI, coerenti con il resto delle dipendenze.
+ratatui = "=0.29.0"
+crossterm = "=0.28.1"
 
 # Dipendenze di sviluppo (solo test).
 [dev-dependencies]

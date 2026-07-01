@@ -18,3 +18,4 @@ pub mod native_compiler;
 pub mod publisher;
 pub mod scaffold;
 pub mod surface;
+pub mod tui;
