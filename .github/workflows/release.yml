@@ -1,0 +1,60 @@
+name: release
+
+# Builds prebuilt Pulse CLI binaries and attaches them to the GitHub release
+# whenever a version tag (v*) is pushed. Apple Silicon builds on macos-14,
+# Intel on macos-13. The Homebrew tap points its arm64 url at the arm64 asset;
+# the x86_64 asset is here so the tap can offer an Intel bottle later.
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: build ${{ matrix.arch }}
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-14
+            arch: arm64
+            target: aarch64-apple-darwin
+          - runner: macos-13
+            arch: x86_64
+            target: x86_64-apple-darwin
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Build release binary
+        run: cargo build --release --target ${{ matrix.target }} --manifest-path cli/Cargo.toml
+
+      - name: Package tarball
+        id: package
+        run: |
+          set -euo pipefail
+          version="${GITHUB_REF_NAME#v}"
+          stage="$(mktemp -d)"
+          cp "cli/target/${{ matrix.target }}/release/pulse" "$stage/pulse"
+          strip "$stage/pulse"
+          chmod +x "$stage/pulse"
+          asset="pulse-v${version}-${{ matrix.arch }}-apple-darwin.tar.gz"
+          tar -czf "$asset" -C "$stage" pulse
+          shasum -a 256 "$asset" | tee "${asset}.sha256"
+          echo "asset=$asset" >> "$GITHUB_OUTPUT"
+
+      - name: Upload to release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            ${{ steps.package.outputs.asset }}
+            ${{ steps.package.outputs.asset }}.sha256
