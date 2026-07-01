@@ -106,6 +106,7 @@ fn initial_manifest(mod_id: &str) -> Manifest {
         dependencies: Vec::new(),
         permissions: Permissions::default(),
         settings: Vec::new(),
+        offsets: Vec::new(),
     }
 }
 

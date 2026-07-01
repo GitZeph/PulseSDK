@@ -98,6 +98,43 @@ pub enum Command {
         #[command(subcommand)]
         action: SurfaceCommand,
     },
+    /// Analizza il `Dev_Environment` e segnala/risolve i problemi (Req 1).
+    Doctor,
+    /// Avvia Geometry Dash e fa streaming live del `Log_Stream` (Req 2).
+    Logs {
+        /// Percorso della `GD_Installation`; se assente, scoperta localmente.
+        #[arg(long = "gd")]
+        gd: Option<PathBuf>,
+    },
+    /// Genera una `Byte_Signature` stabile per un `Offset` (Req 3).
+    Siggen {
+        /// Offset decimale (`4096`) o esadecimale (`0x1000`).
+        offset: String,
+        /// Percorso della `GD_Installation`; se assente, scoperta localmente.
+        #[arg(long = "gd")]
+        gd: Option<PathBuf>,
+    },
+    /// Valida le `Offset_Declaration` del `pulse.toml` contro il `GD_Binary` (Req 4).
+    CheckOffsets {
+        /// Directory del progetto (default: directory corrente).
+        #[arg(default_value = ".")]
+        path: PathBuf,
+        /// Percorso della `GD_Installation`; se assente, scoperta localmente.
+        #[arg(long = "gd")]
+        gd: Option<PathBuf>,
+    },
+    /// Procedura guidata interattiva di submission verso l'`Index` (Req 5).
+    Submit {
+        /// Directory del progetto (default: directory corrente).
+        #[arg(default_value = ".")]
+        path: PathBuf,
+    },
+    /// Upload di artefatti + metadati verso l'`Index_Endpoint` (Req 6).
+    Upload {
+        /// Directory del progetto (default: directory corrente).
+        #[arg(default_value = ".")]
+        path: PathBuf,
+    },
 }
 
 impl Cli {
@@ -123,6 +160,12 @@ impl Cli {
             Command::Uninstall { gd } => run_uninstall(&gd),
             Command::Bindings { action } => action.run(),
             Command::Surface { action } => action.run(),
+            Command::Doctor => run_doctor(),
+            Command::Logs { gd } => run_logs(gd.as_deref()),
+            Command::Siggen { offset, gd } => run_siggen(&offset, gd.as_deref()),
+            Command::CheckOffsets { path, gd } => run_check_offsets(&path, gd.as_deref()),
+            Command::Submit { path } => run_submit(&path),
+            Command::Upload { path } => run_upload(&path),
         }
     }
 }
@@ -283,6 +326,220 @@ pub fn run_uninstall(gd: &std::path::Path) -> anyhow::Result<()> {
 /// La `Display` di [`InstallError`] è già descrittiva.
 fn map_install_err(err: InstallError) -> anyhow::Result<()> {
     anyhow::bail!("operazione installer interrotta: {err}")
+}
+
+// ===========================================================================
+// CLI Command Suite — i sei gestori `run_*` (stesso pattern di `run_build`,
+// `run_install`, …), richiamati sia dalla linea di comando sia dalla TUI
+// in-process, senza duplicare la logica (Req 7.1).
+// ===========================================================================
+
+/// Esegue `pulse doctor`: costruisce il registry dei controlli built-in, esegue
+/// tutti i controlli, stampa l'`Environment_Report` **completo** e termina
+/// secondo la exit policy — report pronto (o con soli `warning`) ⇒ successo;
+/// almeno un `problema` ⇒ errore `anyhow` con codice ≠ 0, dopo aver comunque
+/// stampato tutti i controlli (Req 1.5, 1.6, 1.7, 7.1).
+pub fn run_doctor() -> anyhow::Result<()> {
+    let registry = crate::doctor::default_registry();
+    let report = crate::doctor::run_all(&registry);
+
+    // Stampa l'intero report (tutte le voci) in ogni caso (Req 1.6).
+    print!("{}", report.render());
+
+    if crate::doctor::report::exit_code(&report) == 0 {
+        Ok(())
+    } else {
+        // Req 1.6: almeno un `problema` ⇒ codice ≠ 0 dopo il report completo.
+        anyhow::bail!(
+            "pulse doctor: rilevati problemi che bloccano il Dev_Environment; \
+             risolvili con le azioni indicate nel report"
+        )
+    }
+}
+
+/// Esegue `pulse logs`: avvia Geometry Dash e fa streaming live del
+/// `Log_Stream`, traducendo l'esito nella convenzione `anyhow` (Req 2.1, 2.3,
+/// 2.4, 2.5, 7.1).
+///
+/// Uscita normale ⇒ successo; crash (codice ≠ 0 / segnale) ⇒ errore con codice
+/// ≠ 0; interruzione dell'utente (Ctrl-C) ⇒ uscita pulita dopo la terminazione
+/// del processo figlio. `GD` non individuabile/non avviabile propaga l'errore
+/// con causa da [`crate::logs::stream_logs`] (Req 2.5).
+pub fn run_logs(gd: Option<&std::path::Path>) -> anyhow::Result<()> {
+    match crate::logs::stream_logs(gd)? {
+        // Uscita normale o interruzione volontaria dell'utente ⇒ uscita pulita.
+        crate::logs::LogsExit::Normal | crate::logs::LogsExit::Interrupted => Ok(()),
+        // Crash: codice ≠ 0 / segnale ⇒ errore con causa (Req 2.4).
+        crate::logs::LogsExit::Crashed(code) => anyhow::bail!(
+            "pulse logs: Geometry Dash è terminato in modo anomalo (codice {code})"
+        ),
+    }
+}
+
+/// Esegue `pulse siggen <offset>`: risolve la `GD_Installation`, interpreta
+/// l'offset, legge il `GD_Binary` e genera una `Byte_Signature` verificata,
+/// emettendola su stdout **solo** su successo (fail-closed, Req 3).
+///
+/// - `GD` non fornita né scopribile ⇒ errore con causa, **nessun binario
+///   ridistribuito** (Req 3.7).
+/// - Offset in formato non valido ⇒ errore con il formato atteso, **nessuna
+///   firma** (Req 3.2, 3.3).
+/// - Offset fuori dai limiti / binario illeggibile / firma non a corrispondenza
+///   unica ⇒ errore, **nessuna firma** (Req 3.5, 3.6).
+pub fn run_siggen(offset: &str, gd: Option<&std::path::Path>) -> anyhow::Result<()> {
+    // Risolve la GD_Installation (fornita o scoperta; assente ⇒ errore, nessun
+    // binario ridistribuito) riusando la stessa logica di `pulse logs` (Req 3.7).
+    let install = crate::logs::resolve_installation(gd)?;
+
+    // Interpreta l'offset con l'helper condiviso: formato non valido ⇒ errore
+    // col formato atteso, nessuna firma (Req 3.2, 3.3).
+    let offset = parse_offset(offset)?;
+
+    // Legge i byte dell'eseguibile Mach-O del bundle (GD_Binary), in sola
+    // lettura; illeggibile ⇒ errore, nessuna firma (Req 3.5).
+    let executable = install.executable();
+    let binary = std::fs::read(&executable).map_err(|err| {
+        anyhow::anyhow!(
+            "pulse siggen: lettura del GD_Binary '{}' fallita: {err}",
+            executable.display()
+        )
+    })?;
+
+    // Genera e verifica la firma (fail-closed): emette SOLO su successo (Req 3.1).
+    let signature = crate::siggen::generate(&binary, offset)?;
+    println!("{}", signature.render());
+    Ok(())
+}
+
+/// Esegue `pulse check-offsets`: carica il `Mod_Manifest`, risolve la
+/// `GD_Installation`, apre il `GD_Binary` in sola lettura, classifica **ogni**
+/// `Offset_Declaration` e riporta **tutti** gli `Offset_Verdict` (Req 4).
+///
+/// - Manifest assente / senza alcuna `Offset_Declaration` ⇒ errore, codice ≠ 0,
+///   **nessun output parziale** di verdetti (Req 4.6).
+/// - `GD` non fornita né scopribile ⇒ errore, codice ≠ 0, **nessun binario
+///   ridistribuito** (Req 4.7).
+/// - Tutti `Valid` ⇒ codice 0; almeno un `Invalid`/`Shifted`/`Undeterminable`
+///   ⇒ codice ≠ 0 **dopo** aver riportato tutti i verdetti (Req 4.8, 4.9).
+pub fn run_check_offsets(
+    project_dir: &std::path::Path,
+    gd: Option<&std::path::Path>,
+) -> anyhow::Result<()> {
+    use crate::checkoffsets::Verdict;
+
+    // 1. Carica il Mod_Manifest. Assente/vuoto/senza [[offsets]] ⇒ errore,
+    //    codice ≠ 0, nessun output parziale di verdetti (Req 4.6).
+    let manifest_path = project_dir.join(crate::builder::MANIFEST_FILE);
+    if !manifest_path.is_file() {
+        anyhow::bail!(
+            "pulse check-offsets: Mod_Manifest assente ('{}' non trovato); \
+             nessun verdetto prodotto",
+            manifest_path.display()
+        );
+    }
+    let text = std::fs::read_to_string(&manifest_path).map_err(|err| {
+        anyhow::anyhow!(
+            "pulse check-offsets: lettura del Mod_Manifest '{}' fallita: {err}",
+            manifest_path.display()
+        )
+    })?;
+    let manifest = crate::manifest::Manifest::parse(&text).map_err(|err| {
+        anyhow::anyhow!("pulse check-offsets: Mod_Manifest non analizzabile: {err}")
+    })?;
+    if manifest.offsets.is_empty() {
+        anyhow::bail!(
+            "pulse check-offsets: il Mod_Manifest non contiene alcuna Offset_Declaration \
+             (tabella `[[offsets]]` assente o vuota); nessun verdetto prodotto"
+        );
+    }
+
+    // 2. Risolve la GD_Installation (assente ⇒ errore, codice ≠ 0, nessun
+    //    binario ridistribuito) riusando la logica di `pulse logs` (Req 4.7).
+    let install = crate::logs::resolve_installation(gd)?;
+
+    // 3. Apre il GD_Binary in sola lettura (Req 4.1).
+    let executable = install.executable();
+    let binary = std::fs::read(&executable).map_err(|err| {
+        anyhow::anyhow!(
+            "pulse check-offsets: lettura del GD_Binary '{}' fallita: {err}",
+            executable.display()
+        )
+    })?;
+
+    // 4. Classifica tutte le dichiarazioni e riporta TUTTI i verdetti (Req 4.9).
+    let verdicts = crate::checkoffsets::check_all(&binary, &manifest.offsets);
+    println!("pulse check-offsets — verifica delle Offset_Declaration contro il GD_Binary");
+    for v in &verdicts {
+        match &v.verdict {
+            Verdict::Valid => {
+                println!("  [valid]         {} @ 0x{:X}", v.name, v.declared);
+            }
+            Verdict::Shifted { detected, delta } => {
+                println!(
+                    "  [shifted]       {} dichiarato 0x{:X} → rilevato 0x{:X} (delta {:+})",
+                    v.name, v.declared, detected, delta
+                );
+            }
+            Verdict::Invalid => {
+                println!("  [invalid]       {} @ 0x{:X}", v.name, v.declared);
+            }
+            Verdict::Undeterminable { reason } => {
+                println!(
+                    "  [undeterminable] {} @ 0x{:X}: {reason}",
+                    v.name, v.declared
+                );
+            }
+        }
+    }
+
+    // 5. Exit policy: tutti Valid ⇒ successo; altrimenti errore dopo il report
+    //    completo (Req 4.8, 4.9).
+    let all_valid = verdicts.iter().all(|v| v.verdict == Verdict::Valid);
+    if all_valid {
+        Ok(())
+    } else {
+        anyhow::bail!(
+            "pulse check-offsets: uno o più Offset_Verdict non sono `Valid` \
+             (Invalid/Shifted/Undeterminable); vedi il report sopra"
+        )
+    }
+}
+
+/// Esegue `pulse submit`: avvia la procedura guidata interattiva di submission
+/// e traduce l'esito nella convenzione `anyhow` (Req 5.1, 7.1).
+///
+/// Conferma valida ⇒ successo con conferma della scrittura del
+/// `submission.toml`; annullamento ⇒ uscita pulita senza produrre nulla;
+/// `Mod_Manifest` assente/non valido ⇒ errore con causa da
+/// [`crate::submit::run_wizard`] (Req 5.5).
+pub fn run_submit(project_dir: &std::path::Path) -> anyhow::Result<()> {
+    match crate::submit::run_wizard(project_dir)? {
+        Some(descriptor) => {
+            println!(
+                "pulse submit: submission preparata per '{}' — '{}' scritto in {}",
+                descriptor.mod_id,
+                crate::submit::SUBMISSION_FILE,
+                project_dir.display()
+            );
+            Ok(())
+        }
+        None => {
+            // Req 5.6: annullamento ⇒ uscita pulita, nessun output parziale.
+            println!("pulse submit: procedura annullata, nessuna submission prodotta");
+            Ok(())
+        }
+    }
+}
+
+/// Esegue `pulse upload`: costruisce il [`crate::upload::DefaultIndexClient`] e
+/// delega a [`crate::upload::run`], propagando l'esito con la stessa convenzione
+/// `anyhow` degli altri gestori (Req 6.1, 7.1).
+///
+/// `Index_Endpoint` non configurato ⇒ dry-run a zero rete (successo); endpoint
+/// configurato ⇒ upload reale con verifica di raggiungibilità e timeout.
+pub fn run_upload(project_dir: &std::path::Path) -> anyhow::Result<()> {
+    let client = crate::upload::DefaultIndexClient::new();
+    crate::upload::run(project_dir, &client)
 }
 
 // ===========================================================================
@@ -603,14 +860,27 @@ fn parse_pair(gd: &str, platform: &str) -> anyhow::Result<TargetPair> {
     Ok(TargetPair::new(parse_gd_version(gd)?, parse_platform(platform)?))
 }
 
-/// Interpreta un RVA decimale oppure esadecimale (`0x…`/`0X…`) come `u64`.
-fn parse_rva(value: &str) -> anyhow::Result<u64> {
+/// Interpreta un offset come intero non negativo espresso in forma decimale
+/// (es. `4096`) oppure esadecimale con prefisso `0x`/`0X` (es. `0x1000`), come
+/// `u64`.
+///
+/// Fonte unica dell'accettazione decimale/esadecimale condivisa da tutti i
+/// comandi che leggono un offset (`bindings set-offset`, `crosscheck`,
+/// `run_siggen`, `run_check_offsets`), così che usino la **stessa** notazione.
+/// Su formato non valido restituisce un errore che indica il formato atteso
+/// senza produrre alcun valore.
+pub(crate) fn parse_offset(value: &str) -> anyhow::Result<u64> {
     let parsed = if let Some(hex) = value.strip_prefix("0x").or_else(|| value.strip_prefix("0X")) {
         u64::from_str_radix(hex, 16)
     } else {
         value.parse::<u64>()
     };
-    parsed.map_err(|_| anyhow::anyhow!("--rva malformato {value:?}: atteso intero o 0x esadecimale"))
+    parsed.map_err(|_| {
+        anyhow::anyhow!(
+            "offset malformato {value:?}: atteso intero non negativo decimale (es. 4096) \
+             oppure esadecimale con prefisso 0x (es. 0x1000)"
+        )
+    })
 }
 
 /// Interpreta una stringa esadecimale (lunghezza pari) come vettore di byte.
@@ -679,7 +949,7 @@ fn run_bindings_set_offset(
     contributor: &str,
 ) -> anyhow::Result<()> {
     let pair = parse_pair(gd, platform)?;
-    let rva = parse_rva(rva)?;
+    let rva = parse_offset(rva)?;
     let symbol = SymbolId::new(symbol);
     match bindings::contribution::set_offset(catalog_root, &symbol, pair, rva, contributor) {
         Ok(path) => {
@@ -725,7 +995,7 @@ fn run_bindings_crosscheck(
     platform: &str,
 ) -> anyhow::Result<()> {
     let pair = parse_pair(gd, platform)?;
-    let candidate = parse_rva(rva)?;
+    let candidate = parse_offset(rva)?;
 
     // Geode_Firewall: un contenuto non puramente numerico è rifiutato in
     // chiusura senza incorporarne alcuna parte (Req 4.2/4.5).
@@ -1839,9 +2109,9 @@ mod tests {
         );
         assert!(parse_platform("linux-x64").is_err());
 
-        assert_eq!(parse_rva("0x316688").unwrap(), 0x316688);
-        assert_eq!(parse_rva("42").unwrap(), 42);
-        assert!(parse_rva("0xZZ").is_err());
+        assert_eq!(parse_offset("0x316688").unwrap(), 0x316688);
+        assert_eq!(parse_offset("42").unwrap(), 42);
+        assert!(parse_offset("0xZZ").is_err());
 
         assert_eq!(parse_hex_bytes("626f6f6c").unwrap(), b"bool".to_vec());
         assert!(parse_hex_bytes("abc").is_err());

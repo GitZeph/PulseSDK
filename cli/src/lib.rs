@@ -10,12 +10,18 @@
 
 pub mod bindings;
 pub mod builder;
+pub mod checkoffsets;
 pub mod cli;
+pub mod doctor;
 pub mod extract;
 pub mod installer;
+pub mod logs;
 pub mod manifest;
 pub mod native_compiler;
 pub mod publisher;
 pub mod scaffold;
+pub mod siggen;
+pub mod submit;
 pub mod surface;
 pub mod tui;
+pub mod upload;

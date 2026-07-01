@@ -173,7 +173,40 @@ impl Prompt {
     /// richiede argomenti (es. `build`).
     fn for_action(action: Action) -> Option<Self> {
         match action {
-            Action::Build | Action::ComingSoon => None,
+            // Nessun argomento richiesto: eseguono subito.
+            // `Doctor`/`CheckOffsets`/`Upload` usano `.` + scoperta locale;
+            // `Submit` conduce il proprio wizard interattivo (la TUI viene
+            // sospesa da `run_action` via suspend_tui/resume_tui).
+            Action::Build
+            | Action::Doctor
+            | Action::CheckOffsets
+            | Action::Submit
+            | Action::Upload
+            | Action::ComingSoon => None,
+            // Un solo campo obbligatorio: l'offset (decimale o 0x…).
+            Action::Siggen => Some(Prompt {
+                action,
+                title: "pulse siggen — generate a byte signature".to_string(),
+                fields: vec![Field {
+                    label: "Offset (decimal or 0x…)".to_string(),
+                    value: String::new(),
+                    kind: FieldKind::Text,
+                    required: true,
+                }],
+                active: 0,
+            }),
+            // Percorso GD opzionale: vuoto ⇒ scoperta locale.
+            Action::Logs => Some(Prompt {
+                action,
+                title: "pulse logs — stream Geometry Dash logs".to_string(),
+                fields: vec![Field {
+                    label: "GD .app path (--gd, empty = auto-discover)".to_string(),
+                    value: String::new(),
+                    kind: FieldKind::Text,
+                    required: false,
+                }],
+                active: 0,
+            }),
             Action::New => Some(Prompt {
                 action,
                 title: "pulse new — scaffold a new mod".to_string(),
@@ -461,6 +494,19 @@ impl App {
                 let gd = fields[0].value.trim();
                 cli::run_uninstall(Path::new(gd))
             }
+            Action::Doctor => cli::run_doctor(),
+            Action::Logs => {
+                let gd = fields.first().map(|f| f.value.trim()).unwrap_or("");
+                let gd_path = if gd.is_empty() { None } else { Some(Path::new(gd)) };
+                cli::run_logs(gd_path)
+            }
+            Action::Siggen => {
+                let offset = fields[0].value.trim();
+                cli::run_siggen(offset, None)
+            }
+            Action::CheckOffsets => cli::run_check_offsets(Path::new("."), None),
+            Action::Submit => cli::run_submit(Path::new(".")),
+            Action::Upload => cli::run_upload(Path::new(".")),
             Action::ComingSoon => Ok(()),
         };
 
@@ -496,6 +542,19 @@ fn describe_invocation(action: Action, fields: &[Field]) -> String {
             )
         }
         Action::Uninstall => format!("pulse uninstall --gd {}", fields[0].value.trim()),
+        Action::Doctor => "pulse doctor".to_string(),
+        Action::Logs => {
+            let gd = fields.first().map(|f| f.value.trim()).unwrap_or("");
+            if gd.is_empty() {
+                "pulse logs".to_string()
+            } else {
+                format!("pulse logs --gd {gd}")
+            }
+        }
+        Action::Siggen => format!("pulse siggen {}", fields[0].value.trim()),
+        Action::CheckOffsets => "pulse check-offsets".to_string(),
+        Action::Submit => "pulse submit".to_string(),
+        Action::Upload => "pulse upload".to_string(),
         Action::ComingSoon => "pulse".to_string(),
     }
 }

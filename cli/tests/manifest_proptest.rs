@@ -126,6 +126,7 @@ fn arb_manifest() -> impl Strategy<Value = Manifest> {
                 dependencies,
                 permissions: Permissions { required: perms },
                 settings,
+                offsets: Vec::new(),
             },
         )
 }

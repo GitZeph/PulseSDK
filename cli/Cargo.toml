@@ -1,6 +1,6 @@
 [package]
 name = "pulse-cli"
-version = "0.1.1"
+version = "0.2.0"
 edition = "2021"
 description = "Pulse CLI — scaffold, build e publish delle mod Pulse (Req 14, 26.6)"
 license = "MIT"
@@ -54,6 +54,17 @@ yaxpeax-x86 = { version = "2", default-features = false }
 # riproducibilità della build CLI, coerenti con il resto delle dipendenze.
 ratatui = "=0.29.0"
 crossterm = "=0.28.1"
+# Client HTTP sincrono, minimale e senza runtime async per il seam di rete della
+# CLI. (a) Uso: l'unico comando con rete è `upload`, e **solo** quando un
+# `Index_Endpoint` è configurato (Req 6.1); tutti gli altri comandi restano a
+# zero rete. (b) Confinamento: l'HTTP reale vive esclusivamente in
+# `DefaultIndexClient` (`cli/src/upload.rs`) dietro il trait `IndexClient`; il
+# ramo con `Index_Endpoint` non configurato è un dry-run puro a zero rete, in
+# cui `ureq` non viene mai esercitato. (c) Rifiuto di `reqwest`: troppo pesante e
+# trascina `tokio`/runtime async, incoerente con questa CLI sincrona — nessuna
+# nuova dipendenza async introdotta. Versione esatta con patch fissata nel
+# Cargo.lock per riproducibilità della build CLI, coerente col resto.
+ureq = "=2.12.1"
 
 # Dipendenze di sviluppo (solo test).
 [dev-dependencies]

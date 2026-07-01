@@ -286,6 +286,37 @@ pub struct SettingDecl {
 }
 
 // ---------------------------------------------------------------------------
+// OffsetDeclaration — tabella opzionale [[offsets]] (Req 4.1, 4.5).
+//
+// Ogni voce dichiara un offset del GD_Binary con l'AOB attesa opzionale.
+// La tabella è OPZIONALE e retro-compatibile: i manifest privi di `[[offsets]]`
+// continuano ad analizzarsi come prima con `offsets` vuoto (`#[serde(default)]`).
+//
+//   [[offsets]]
+//   name = "MenuLayer::init"
+//   offset = "0x316688"          # decimale o esadecimale 0x… (coerente con parse_offset)
+//   signature = "48 8B ? ? 89"   # AOB attesa (opzionale)
+//
+// `signature` è il contenuto atteso ed è il perno del fail-closed di
+// `check-offsets`: la sua ASSENZA rende la dichiarazione NON DETERMINABILE a
+// valle (mai `Valid`, Req 4.5).
+// ---------------------------------------------------------------------------
+
+/// Una `Offset_Declaration` della tabella opzionale `[[offsets]]` del manifest.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct OffsetDeclaration {
+    /// Nome leggibile dell'offset dichiarato (es. `MenuLayer::init`).
+    pub name: String,
+    /// Offset nel `GD_Binary`, in forma decimale o esadecimale `0x…`
+    /// (interpretato a valle con `parse_offset`, coerente con `siggen`).
+    pub offset: String,
+    /// AOB attesa (`Byte_Signature`) opzionale. La sua assenza rende la
+    /// dichiarazione non determinabile a valle (mai `Valid`, Req 4.5).
+    #[serde(default)]
+    pub signature: Option<String>,
+}
+
+// ---------------------------------------------------------------------------
 // Manifest — modello logico del `pulse.toml` (Req 16.1).
 // ---------------------------------------------------------------------------
 
@@ -305,6 +336,10 @@ pub struct Manifest {
     pub permissions: Permissions,
     #[serde(default)]
     pub settings: Vec<SettingDecl>,
+    /// Tabella opzionale `[[offsets]]` (Req 4.1). Retro-compatibile: i manifest
+    /// privi della tabella hanno `offsets` vuoto (default).
+    #[serde(default)]
+    pub offsets: Vec<OffsetDeclaration>,
 }
 
 fn default_schema_version() -> i32 {
@@ -583,6 +618,7 @@ mod tests {
                     default: SettingValue::Str("hello".to_string()),
                 },
             ],
+            offsets: Vec::new(),
         }
     }
 
@@ -711,6 +747,7 @@ mod tests {
                 setting_type: "int".to_string(),
                 default: SettingValue::Str("nope".to_string()), // default incoerente
             }],
+            offsets: Vec::new(),
         };
         let res = m.validate();
         assert!(!res.ok());

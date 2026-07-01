@@ -566,6 +566,7 @@ mod tests {
             dependencies: Vec::new(),
             permissions: Permissions::default(),
             settings: Vec::new(),
+            offsets: Vec::new(),
         }
     }
 

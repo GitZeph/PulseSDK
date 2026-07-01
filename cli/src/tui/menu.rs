@@ -28,6 +28,18 @@ pub enum Action {
     Install,
     /// `pulse uninstall` → `installer::uninstall`.
     Uninstall,
+    /// `pulse doctor` → `cli::run_doctor`.
+    Doctor,
+    /// `pulse logs` → `cli::run_logs`.
+    Logs,
+    /// `pulse siggen <offset>` → `cli::run_siggen`.
+    Siggen,
+    /// `pulse check-offsets` → `cli::run_check_offsets`.
+    CheckOffsets,
+    /// `pulse submit` → `cli::run_submit`.
+    Submit,
+    /// `pulse upload` → `cli::run_upload`.
+    Upload,
     /// Comando non ancora disponibile.
     ComingSoon,
 }
@@ -112,16 +124,16 @@ pub const GROUPS: &[Group] = &[
                 description: "Check the dev environment (GD version, C++ toolchain) and flag problems.",
                 audience: "devs",
                 invocation: "pulse doctor",
-                status: Status::ComingSoon,
-                action: Action::ComingSoon,
+                status: Status::Real,
+                action: Action::Doctor,
             },
             Command {
                 label: "logs",
                 description: "Launch GD and stream its console logs live.",
                 audience: "devs",
                 invocation: "pulse logs",
-                status: Status::ComingSoon,
-                action: Action::ComingSoon,
+                status: Status::Real,
+                action: Action::Logs,
             },
         ],
     },
@@ -133,16 +145,16 @@ pub const GROUPS: &[Group] = &[
                 description: "Generate a stable byte signature (AOB) for an offset.",
                 audience: "reverse engineers",
                 invocation: "pulse siggen <offset>",
-                status: Status::ComingSoon,
-                action: Action::ComingSoon,
+                status: Status::Real,
+                action: Action::Siggen,
             },
             Command {
                 label: "check-offsets",
                 description: "Validate the offsets in pulse.toml against the installed GD binary.",
                 audience: "reverse engineers",
                 invocation: "pulse check-offsets",
-                status: Status::ComingSoon,
-                action: Action::ComingSoon,
+                status: Status::Real,
+                action: Action::CheckOffsets,
             },
         ],
     },
@@ -154,16 +166,16 @@ pub const GROUPS: &[Group] = &[
                 description: "Interactive wizard to submit a mod to the Index (with support tags).",
                 audience: "everyone",
                 invocation: "pulse submit",
-                status: Status::ComingSoon,
-                action: Action::ComingSoon,
+                status: Status::Real,
+                action: Action::Submit,
             },
             Command {
                 label: "upload",
                 description: "Upload the mod binaries + metadata to the index.",
                 audience: "everyone",
                 invocation: "pulse upload",
-                status: Status::ComingSoon,
-                action: Action::ComingSoon,
+                status: Status::Real,
+                action: Action::Upload,
             },
         ],
     },
