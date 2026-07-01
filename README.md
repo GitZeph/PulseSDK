@@ -8,6 +8,26 @@ It started Mac-first (Apple Silicon, the platform that's always last to get love
 
 ---
 
+## Install
+
+On macOS, via Homebrew — no cloning, no Rust setup, no env-var wrangling:
+
+```sh
+brew install GitZeph/pulse/pulse
+```
+
+Then:
+
+```sh
+pulse            # interactive TUI
+pulse --help     # or drive it from the command line
+pulse new mymod  # scaffold your first mod
+```
+
+(Tap lives at [GitZeph/homebrew-pulse](https://github.com/GitZeph/homebrew-pulse). Building from source instead? `cargo build --release --manifest-path cli/Cargo.toml`.)
+
+---
+
 ## Wait, isn't Geode already a thing?
 
 Yeah, and Geode is great. We're not here to trash it — half of what we know we learned by staring at how the community solved these problems over the years.
